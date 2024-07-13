@@ -3,10 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Three.js Example</title>
+    <title>Moon Clock</title>
     <style>
         body { margin: 0; }
         canvas { display: block; }
+        .controls {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1;
+            display: flex;
+            gap: 10px;
+        }
+        .date-display {
+            background: white;
+            padding: 5px;
+            border-radius: 5px;
+        }
+        button {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #ddd;
+        }
     </style>
     <script type="importmap">
         {
@@ -18,66 +40,11 @@
     </script>
 </head>
 <body>
-    <script type="module">
-        import * as THREE from 'three';
-        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-
-        // Scene setup
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
-
-        // Sphere geometry and material
-        const geometry = new THREE.SphereGeometry(2, 64, 64);
-
-        // Load texture (specular and normal maps)
-        const textureLoader = new THREE.TextureLoader();
-        const texture = textureLoader.load('./maps/texture_map.png'); // Adjust the path accordingly
-        const specularMap = textureLoader.load('./maps/specular_map.png'); // Adjust the path accordingly
-        const normalMap = textureLoader.load('./maps/normal_map.png'); // Adjust the path accordingly
-        const displacementMap = textureLoader.load('./maps/displacement_map.png'); // Adjust the path accordingly
-
-        const material = new THREE.MeshStandardMaterial({
-            map: texture,
-            specularMap: specularMap,
-            normalMap: normalMap,
-            displacementMap: displacementMap,
-            displacementScale: 0.025, // Lower value for a smoother effect
-            displacementBias: -0.05, // Adjust the displacement baseline
-            metalness: 0.1, // Adjust the metalness value as needed
-            roughness: 1, // Adjust the roughness value as needed
-            side: THREE.DoubleSide // Render both sides of the geometry
-        });
-
-        const moon = new THREE.Mesh(geometry, material);
-        scene.add(moon);
-
-        // Light setup
-        // const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
-        // directionalLight.position.set(10, 10, 10);
-        // scene.add(directionalLight);
-
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8); // Soft white light
-        scene.add(ambientLight);
-
-        // Camera position
-        camera.position.z = 4;
-
-        // Orbit controls
-        const controls = new OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-
-        // Animation function
-        function animate() {
-            requestAnimationFrame(animate);
-            controls.update();
-            renderer.render(scene, camera);
-            renderer.shadowMap.enabled = true;
-        }
-
-        animate();
-    </script>
+    <div class="controls">
+        <button id="prevDay">Previous Day</button>
+        <div id="dateDisplay" class="date-display"></div>
+        <button id="nextDay">Next Day</button>
+    </div>
+    <script type="module" src="script.js"></script>
 </body>
 </html>
