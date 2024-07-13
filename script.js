@@ -29,6 +29,7 @@ const material = new THREE.MeshStandardMaterial({
 });
 
 const moon = new THREE.Mesh(geometry, material);
+moon.rotation.y = Math.PI * 3 / 2; // Rotate the moon to face the camera correctly initially
 scene.add(moon);
 
 // Light setup
@@ -80,11 +81,6 @@ function updateMoonPhase(date) {
     const lightZ = Math.sin(moonPhaseAngle) * 10; // Adjust distance as needed
 
     directionalLight.position.set(lightX, lightY, lightZ);
-
-    // Orient the moon correctly (initial guess)
-    moon.rotation.y = Math.PI * 3 / 2; // Rotate the moon to face the camera correctly
-
-    console.log(`Moon rotation (y): ${moon.rotation.y}`);
 }
 
 // Update moon phase for the current date
