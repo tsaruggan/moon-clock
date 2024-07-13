@@ -90,6 +90,7 @@ function updateMoonPhase(date) {
 
 // Update moon phase for the current date
 let currentDate = new Date();
+currentDate.setDate(currentDate.getDate() + 13);
 
 function updateDateDisplay() {
     const dateDisplay = document.getElementById('dateDisplay');

@@ -131,7 +131,7 @@ def create_texture(image_path, output_path, brightness=0, contrast=0, blur_ksize
 filename = "../images/moon8192px.jpg"
 
 # Create normal map
-create_normal_map(filename, '../maps/normal_map.png', intensity=3.0, blur_ksize=(3, 3), brightness=30, contrast=20)
+create_normal_map(filename, '../maps/normal_map.png', intensity=1.0, blur_ksize=(3, 3), brightness=0, contrast=20)
 
 # Create specular map
 create_specular_map(filename, '../maps/specular_map.png', brightness=20, contrast=30, blur_ksize=(1, 1))
