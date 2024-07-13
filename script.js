@@ -14,7 +14,6 @@ const geometry = new THREE.SphereGeometry(2, 64, 64);
 // Load texture (specular and normal maps)
 const textureLoader = new THREE.TextureLoader();
 const texture = textureLoader.load('./maps/texture_map.png'); // Adjust the path accordingly
-const specularMap = textureLoader.load('./maps/specular_map.png'); // Adjust the path accordingly
 const normalMap = textureLoader.load('./maps/normal_map.png'); // Adjust the path accordingly
 const displacementMap = textureLoader.load('./maps/displacement_map.png'); // Adjust the path accordingly
 
@@ -90,7 +89,7 @@ function updateMoonPhase(date) {
 
 // Update moon phase for the current date
 let currentDate = new Date();
-currentDate.setDate(currentDate.getDate() + 13);
+currentDate.setHours(currentDate.getHours() + 12); // Initial datetime
 
 function updateDateDisplay() {
     const dateDisplay = document.getElementById('dateDisplay');
@@ -102,14 +101,11 @@ function updateScene() {
     updateDateDisplay();
 }
 
-// Event listeners for buttons
-document.getElementById('prevDay').addEventListener('click', () => {
-    currentDate.setDate(currentDate.getDate() - 1);
-    updateScene();
-});
-
-document.getElementById('nextDay').addEventListener('click', () => {
-    currentDate.setDate(currentDate.getDate() + 1);
+// Event listener for slider input
+document.getElementById('dateTimeSlider').addEventListener('input', (event) => {
+    const hoursOffset = parseInt(event.target.value);
+    currentDate = new Date();
+    currentDate.setHours(currentDate.getHours() + hoursOffset);
     updateScene();
 });
 

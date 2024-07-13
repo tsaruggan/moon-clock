@@ -20,14 +20,8 @@
             padding: 5px;
             border-radius: 5px;
         }
-        button {
-            padding: 5px 10px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #ddd;
+        input[type="range"] {
+            width: 200px;
         }
     </style>
     <script type="importmap">
@@ -41,9 +35,8 @@
 </head>
 <body>
     <div class="controls">
-        <button id="prevDay">Previous Day</button>
+        <input type="range" id="dateTimeSlider" min="-1000" max="1000" step="1" value="0">
         <div id="dateDisplay" class="date-display"></div>
-        <button id="nextDay">Next Day</button>
     </div>
     <script type="module" src="script.js"></script>
 </body>
