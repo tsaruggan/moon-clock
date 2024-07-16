@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 // Constants
-const INITIAL_SCALE_FACTOR = 0.01; // Adjust this value to control the initial size
+const INITIAL_SCALE_FACTOR = 0.0075; // Adjust this value to control the initial size
 const INITIAL_X_ROTATION = 0; // Adjust this value for the initial X rotation
 const INITIAL_Y_ROTATION = 0; // Adjust this value for the initial Y rotation
 const INITIAL_Z_ROTATION = 0; // Adjust this value for the initial Z rotation
@@ -50,7 +50,7 @@ const moon = new THREE.Mesh(geometry, material);
 scene.add(moon);
 
 // Light setup
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.1); // Dim ambient light
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.05); // Dim ambient light
 scene.add(ambientLight);
 
 const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5); // Strong directional light
