@@ -3,45 +3,47 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 // Constants
 const INITIAL_SCALE_FACTOR = 0.01; // Adjust this value to control the initial size
-const INITIAL_X_ROTATION = 0; // Adjust this value for the initial X rotation (about 30 degrees)
-const INITIAL_Y_ROTATION = Math.PI * 3 / 2; // Adjust this value for the initial Y rotation (about 270 degrees)
+const INITIAL_X_ROTATION = 0; // Adjust this value for the initial X rotation
+const INITIAL_Y_ROTATION = 0; // Adjust this value for the initial Y rotation
 const INITIAL_Z_ROTATION = 0; // Adjust this value for the initial Z rotation
 
 // Scene setup
 const scene = new THREE.Scene();
 
 // Add AxesHelper to visualize the axes
-const axesHelper = new THREE.AxesHelper(5); // Length of the axes lines (adjust as needed)
+const axesHelper = new THREE.AxesHelper(5); // Length of the axes lines
 scene.add(axesHelper);
 
 // Add GridHelper to visualize a grid in the scene
-const gridHelper = new THREE.GridHelper(10, 10); // Size of the grid (adjust as needed)
+const gridHelper = new THREE.GridHelper(10, 10); // Size of the grid
 scene.add(gridHelper);
 
-
+// Camera setup
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+camera.position.set(5, 0, 0); // Position the camera along the X-axis
+camera.lookAt(0, 0, 0); // Point the camera at the center of the scene
+
+// Renderer setup
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
 // Sphere geometry and material
 const geometry = new THREE.SphereGeometry(2, 64, 64);
-
-// Load texture (specular and normal maps)
 const textureLoader = new THREE.TextureLoader();
-const texture = textureLoader.load('./maps/texture_map.png'); // Adjust the path accordingly
-const normalMap = textureLoader.load('./maps/normal_map.png'); // Adjust the path accordingly
-const displacementMap = textureLoader.load('./maps/displacement_map.png'); // Adjust the path accordingly
+const texture = textureLoader.load('./maps/texture_map.png');
+const normalMap = textureLoader.load('./maps/normal_map.png');
+const displacementMap = textureLoader.load('./maps/displacement_map.png');
 
 const material = new THREE.MeshStandardMaterial({
     map: texture,
     normalMap: normalMap,
     displacementMap: displacementMap,
-    displacementScale: 0.025, // Lower value for a smoother effect
-    displacementBias: -0.05, // Adjust the displacement baseline
-    metalness: 0, // Adjust the metalness value as needed
-    roughness: 1, // Adjust the roughness value as needed
-    side: THREE.DoubleSide // Render both sides of the geometry
+    displacementScale: 0.025,
+    displacementBias: -0.05,
+    metalness: 0,
+    roughness: 1,
+    side: THREE.DoubleSide
 });
 
 const moon = new THREE.Mesh(geometry, material);
@@ -53,12 +55,9 @@ scene.add(ambientLight);
 
 const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5); // Strong directional light
 directionalLight.castShadow = true;
-directionalLight.shadow.mapSize.width = 2048; // Shadow map resolution
+directionalLight.shadow.mapSize.width = 2048;
 directionalLight.shadow.mapSize.height = 2048;
 scene.add(directionalLight);
-
-// Camera position
-camera.position.z = 4;
 
 // Orbit controls
 const controls = new OrbitControls(camera, renderer.domElement);
@@ -91,9 +90,9 @@ function updateMoonPhase(date) {
     const moonPhaseAngle = getMoonPhaseAngle(date);
 
     // Calculate the light position based on the moon phase angle
-    const lightX = -Math.cos(moonPhaseAngle) * 10; // Adjust distance as needed
+    const lightX = -Math.sin(moonPhaseAngle) * 10; // Adjust distance as needed
     const lightY = 0; // Keep the light on the same plane as the moon for simplicity
-    const lightZ = -Math.sin(moonPhaseAngle) * 10; // Adjust distance as needed
+    const lightZ = Math.cos(moonPhaseAngle) * 10; // Adjust distance as needed
 
     directionalLight.position.set(lightX, lightY, lightZ);
 }
@@ -101,13 +100,13 @@ function updateMoonPhase(date) {
 // Function to calculate the moon's libration and apparent size
 function calculateMoonLibration(date) {
     const daysSinceJ2000 = (date - new Date(Date.UTC(2000, 0, 1, 12, 0, 0))) / (1000 * 60 * 60 * 24);
-    
+
     // Mean anomaly of the moon (degrees)
     const meanAnomaly = (134.963 + 13.064993 * daysSinceJ2000) % 360;
-    
+
     // Mean elongation of the moon (degrees)
     const meanElongation = (297.850 + 12.190749 * daysSinceJ2000) % 360;
-    
+
     // Moon's distance from Earth in Earth radii
     const distance = 60.4 - 3.3 * Math.cos(meanAnomaly * Math.PI / 180) - 0.6 * Math.cos(2 * meanElongation * Math.PI / 180);
 
@@ -125,28 +124,27 @@ function calculateMoonLibration(date) {
 
 // Update moon phase and libration for the current date
 let currentDate = new Date();
-// let currentDate = new Date('July 21, 2024');
 
 // Initial scene update with apparent size adjustment
 const initialLibration = calculateMoonLibration(currentDate);
-moon.rotation.x = INITIAL_X_ROTATION; // Set initial X rotation
-moon.rotation.y = INITIAL_Y_ROTATION; // Set initial Y rotation
-moon.rotation.z = INITIAL_Z_ROTATION; // Set initial Z rotation
-moon.scale.setScalar(initialLibration.apparentSize / INITIAL_SCALE_FACTOR); // Normalize to initial size
+moon.rotation.x = INITIAL_X_ROTATION;
+moon.rotation.y = INITIAL_Y_ROTATION;
+moon.rotation.z = INITIAL_Z_ROTATION;
+moon.scale.setScalar(initialLibration.apparentSize / INITIAL_SCALE_FACTOR);
 updateScene();
 
 // Function to update the scene
 function updateScene() {
     updateMoonPhase(currentDate);
-    
+
     moon.rotation.x = INITIAL_X_ROTATION;
     moon.rotation.y = INITIAL_Y_ROTATION;
     moon.rotation.z = INITIAL_Z_ROTATION;
 
     const { librationLongitude, librationLatitude, apparentSize } = calculateMoonLibration(currentDate);
-    moon.rotation.x += -THREE.MathUtils.degToRad(librationLatitude); // Libration in latitude
-    moon.rotation.y += THREE.MathUtils.degToRad(librationLongitude); // Libration in longitude
-    moon.scale.setScalar(apparentSize / INITIAL_SCALE_FACTOR); // Normalize to initial size
+    moon.rotation.x += -THREE.MathUtils.degToRad(librationLatitude * 3); // Libration in latitude
+    moon.rotation.y += THREE.MathUtils.degToRad(librationLongitude * 3); // Libration in longitude
+    moon.scale.setScalar(apparentSize / INITIAL_SCALE_FACTOR);
     updateDateDisplay();
 }
 
@@ -172,7 +170,6 @@ function animate() {
     requestAnimationFrame(animate);
     controls.update();
     renderer.render(scene, camera);
-    renderer.shadowMap.enabled = true;
 }
 
 animate();
