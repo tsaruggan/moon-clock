@@ -1,0 +1,47 @@
+body { margin: 0; overflow: hidden; }
+canvas { display: block; position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
+.controls {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(0, 255, 0, 0.1); /* Light green background */
+    padding: 10px;
+    border-radius: 1000px;
+}
+.button {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #00FF00; /* Neon green color */
+}
+.datepicker {
+    background: none;
+    /* border: 1px solid #ccc; */
+    border: none;
+    padding: 5px;
+    border-radius: 5px;
+    font-size: 20px;
+    cursor: pointer;
+    color: #00FF00;
+    accent-color: #00FF00;
+}
+.datepicker::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    color-scheme: dark;
+}
+
+/* Adjusting hover and focus states for better usability */
+.datepicker:hover,
+.datepicker:focus {
+    background: rgba(0, 255, 0, 0.1); /* Light green background on hover/focus */
+    outline: none; /* Remove default focus outline */
+}
+.datepicker .date-cell:hover {
+    background-color: #F0F0F0; /* Hover color for date cells */
+}

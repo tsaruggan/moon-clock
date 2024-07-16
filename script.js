@@ -10,14 +10,6 @@ const INITIAL_Z_ROTATION = 0; // Adjust this value for the initial Z rotation
 // Scene setup
 const scene = new THREE.Scene();
 
-// Add AxesHelper to visualize the axes
-const axesHelper = new THREE.AxesHelper(5); // Length of the axes lines
-scene.add(axesHelper);
-
-// Add GridHelper to visualize a grid in the scene
-const gridHelper = new THREE.GridHelper(10, 10); // Size of the grid
-scene.add(gridHelper);
-
 // Camera setup
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.set(5, 0, 0); // Position the camera along the X-axis
@@ -124,6 +116,7 @@ function calculateMoonLibration(date) {
 
 // Update moon phase and libration for the current date
 let currentDate = new Date();
+document.getElementById('dateTimePicker').value = new Date().toISOString().slice(0, 16);
 
 // Initial scene update with apparent size adjustment
 const initialLibration = calculateMoonLibration(currentDate);
@@ -145,27 +138,37 @@ function updateScene() {
     moon.rotation.x += -THREE.MathUtils.degToRad(librationLatitude * 3); // Libration in latitude
     moon.rotation.y += THREE.MathUtils.degToRad(librationLongitude * 3); // Libration in longitude
     moon.scale.setScalar(apparentSize / INITIAL_SCALE_FACTOR);
-    updateDateDisplay();
 }
 
-// Function to update the date display
-function updateDateDisplay() {
-    const dateDisplay = document.getElementById('dateDisplay');
-    dateDisplay.textContent = currentDate.toDateString();
-}
+// Event listener for datetime picker input
+document.getElementById('dateTimePicker').addEventListener('input', (event) => {
+    const dateTime = new Date(event.target.value);
+    if (!isNaN(dateTime)) {
+        currentDate = dateTime;
+        updateScene();
+    }
+});
 
-// Event listener for slider input
-document.getElementById('dateTimeSlider').addEventListener('input', (event) => {
-    const hoursOffset = parseInt(event.target.value);
-    currentDate = new Date();
-    currentDate.setHours(currentDate.getHours() + hoursOffset);
+// Event listeners for buttons
+document.getElementById('leftButton').addEventListener('click', () => {
+    const dateTimePicker = document.getElementById('dateTimePicker');
+    const dateTime = new Date(dateTimePicker.value);
+    dateTime.setHours(dateTime.getHours() - 1);
+    dateTimePicker.value = dateTime.toISOString().slice(0, 16);
+    currentDate = dateTime;
     updateScene();
 });
 
-// Initial scene update
-updateScene();
+document.getElementById('rightButton').addEventListener('click', () => {
+    const dateTimePicker = document.getElementById('dateTimePicker');
+    const dateTime = new Date(dateTimePicker.value);
+    dateTime.setHours(dateTime.getHours() + 1);
+    dateTimePicker.value = dateTime.toISOString().slice(0, 16);
+    currentDate = dateTime;
+    updateScene();
+});
 
-// Animation function
+// Animation loop
 function animate() {
     requestAnimationFrame(animate);
     controls.update();
@@ -173,3 +176,10 @@ function animate() {
 }
 
 animate();
+
+// Handle window resize
+window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+});

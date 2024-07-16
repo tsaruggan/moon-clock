@@ -4,26 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Moon Clock</title>
-    <style>
-        body { margin: 0; }
-        canvas { display: block; }
-        .controls {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            z-index: 1;
-            display: flex;
-            gap: 10px;
-        }
-        .date-display {
-            background: white;
-            padding: 5px;
-            border-radius: 5px;
-        }
-        input[type="range"] {
-            width: 200px;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css" >
     <script type="importmap">
         {
           "imports": {
@@ -35,8 +16,9 @@
 </head>
 <body>
     <div class="controls">
-        <input type="range" id="dateTimeSlider" min="-1000" max="1000" step="1" value="0">
-        <div id="dateDisplay" class="date-display"></div>
+        <button class="button" id="leftButton">🌘</button>
+        <input type="datetime-local" id="dateTimePicker" class="datepicker">
+        <button class="button" id="rightButton">🌒</button>
     </div>
     <script type="module" src="script.js"></script>
 </body>
