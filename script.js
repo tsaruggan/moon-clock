@@ -1,8 +1,24 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
+// Constants
+const INITIAL_SCALE_FACTOR = 0.01; // Adjust this value to control the initial size
+const INITIAL_X_ROTATION = 0; // Adjust this value for the initial X rotation (about 30 degrees)
+const INITIAL_Y_ROTATION = Math.PI * 3 / 2; // Adjust this value for the initial Y rotation (about 270 degrees)
+const INITIAL_Z_ROTATION = 0; // Adjust this value for the initial Z rotation
+
 // Scene setup
 const scene = new THREE.Scene();
+
+// Add AxesHelper to visualize the axes
+const axesHelper = new THREE.AxesHelper(5); // Length of the axes lines (adjust as needed)
+scene.add(axesHelper);
+
+// Add GridHelper to visualize a grid in the scene
+const gridHelper = new THREE.GridHelper(10, 10); // Size of the grid (adjust as needed)
+scene.add(gridHelper);
+
+
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -29,7 +45,6 @@ const material = new THREE.MeshStandardMaterial({
 });
 
 const moon = new THREE.Mesh(geometry, material);
-moon.rotation.y = Math.PI * 3 / 2; // Rotate the moon to face the camera correctly initially
 scene.add(moon);
 
 // Light setup
@@ -76,25 +91,69 @@ function updateMoonPhase(date) {
     const moonPhaseAngle = getMoonPhaseAngle(date);
 
     // Calculate the light position based on the moon phase angle
-    const lightX = Math.cos(moonPhaseAngle) * 10; // Adjust distance as needed
+    const lightX = -Math.cos(moonPhaseAngle) * 10; // Adjust distance as needed
     const lightY = 0; // Keep the light on the same plane as the moon for simplicity
-    const lightZ = Math.sin(moonPhaseAngle) * 10; // Adjust distance as needed
+    const lightZ = -Math.sin(moonPhaseAngle) * 10; // Adjust distance as needed
 
     directionalLight.position.set(lightX, lightY, lightZ);
 }
 
-// Update moon phase for the current date
-let currentDate = new Date();
-currentDate.setHours(currentDate.getHours() + 12); // Initial datetime
+// Function to calculate the moon's libration and apparent size
+function calculateMoonLibration(date) {
+    const daysSinceJ2000 = (date - new Date(Date.UTC(2000, 0, 1, 12, 0, 0))) / (1000 * 60 * 60 * 24);
+    
+    // Mean anomaly of the moon (degrees)
+    const meanAnomaly = (134.963 + 13.064993 * daysSinceJ2000) % 360;
+    
+    // Mean elongation of the moon (degrees)
+    const meanElongation = (297.850 + 12.190749 * daysSinceJ2000) % 360;
+    
+    // Moon's distance from Earth in Earth radii
+    const distance = 60.4 - 3.3 * Math.cos(meanAnomaly * Math.PI / 180) - 0.6 * Math.cos(2 * meanElongation * Math.PI / 180);
 
+    // Apparent size (degrees)
+    const apparentSize = 0.5181 * (1 / distance);
+
+    // Libration in longitude (degrees)
+    const librationLongitude = 6.289 * Math.sin(meanAnomaly * Math.PI / 180);
+
+    // Libration in latitude (degrees)
+    const librationLatitude = 5.128 * Math.sin(meanElongation * Math.PI / 180);
+
+    return { librationLongitude, librationLatitude, apparentSize };
+}
+
+// Update moon phase and libration for the current date
+let currentDate = new Date();
+// let currentDate = new Date('July 21, 2024');
+
+// Initial scene update with apparent size adjustment
+const initialLibration = calculateMoonLibration(currentDate);
+moon.rotation.x = INITIAL_X_ROTATION; // Set initial X rotation
+moon.rotation.y = INITIAL_Y_ROTATION; // Set initial Y rotation
+moon.rotation.z = INITIAL_Z_ROTATION; // Set initial Z rotation
+moon.scale.setScalar(initialLibration.apparentSize / INITIAL_SCALE_FACTOR); // Normalize to initial size
+updateScene();
+
+// Function to update the scene
+function updateScene() {
+    updateMoonPhase(currentDate);
+    
+    moon.rotation.x = INITIAL_X_ROTATION;
+    moon.rotation.y = INITIAL_Y_ROTATION;
+    moon.rotation.z = INITIAL_Z_ROTATION;
+
+    const { librationLongitude, librationLatitude, apparentSize } = calculateMoonLibration(currentDate);
+    moon.rotation.x += -THREE.MathUtils.degToRad(librationLatitude); // Libration in latitude
+    moon.rotation.y += THREE.MathUtils.degToRad(librationLongitude); // Libration in longitude
+    moon.scale.setScalar(apparentSize / INITIAL_SCALE_FACTOR); // Normalize to initial size
+    updateDateDisplay();
+}
+
+// Function to update the date display
 function updateDateDisplay() {
     const dateDisplay = document.getElementById('dateDisplay');
     dateDisplay.textContent = currentDate.toDateString();
-}
-
-function updateScene() {
-    updateMoonPhase(currentDate);
-    updateDateDisplay();
 }
 
 // Event listener for slider input
