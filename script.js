@@ -149,24 +149,36 @@ document.getElementById('dateTimePicker').addEventListener('input', (event) => {
     }
 });
 
-// Event listeners for buttons
 document.getElementById('leftButton').addEventListener('click', () => {
     const dateTimePicker = document.getElementById('dateTimePicker');
     const dateTime = new Date(dateTimePicker.value);
-    dateTime.setHours(dateTime.getHours() - 1);
+    dateTime.setHours(dateTime.getHours() - 1); // Adjusting hours by -1
+
+    // Update the datetime picker value with local time
     dateTimePicker.value = dateTime.toISOString().slice(0, 16);
+
+    // Update the currentDate variable used in your application
     currentDate = dateTime;
+
+    // Call the function to update the scene based on the new datetime
     updateScene();
 });
 
 document.getElementById('rightButton').addEventListener('click', () => {
     const dateTimePicker = document.getElementById('dateTimePicker');
     const dateTime = new Date(dateTimePicker.value);
-    dateTime.setHours(dateTime.getHours() + 1);
+    dateTime.setHours(dateTime.getHours() + 1); // Adjusting hours by +1
+
+    // Update the datetime picker value with local time
     dateTimePicker.value = dateTime.toISOString().slice(0, 16);
+
+    // Update the currentDate variable used in your application
     currentDate = dateTime;
+
+    // Call the function to update the scene based on the new datetime
     updateScene();
 });
+
 
 // Animation loop
 function animate() {
