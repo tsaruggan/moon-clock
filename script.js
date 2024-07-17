@@ -56,6 +56,33 @@ scene.add(directionalLight);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 
+let resetVisibility = false;
+controls.addEventListener('start', () => {
+    resetVisibility = true;
+    setResetVisibility();
+});
+
+// Function to toggle resetButton visibility
+function setResetVisibility() {
+    const resetButton = document.getElementById('resetButton');
+    if (resetVisibility) {
+        resetButton.style.display = 'block';
+    } else {
+        resetButton.style.display = 'none';
+    }
+}
+
+// Event listener for reset button
+document.getElementById('resetButton').addEventListener('click', (event) => {
+    resetVisibility = false;
+    moon.position.set(0,0,0); // Reset moon position to initial
+    controls.reset(); // Reset OrbitControls to initial settings
+    updateScene(); // Update the scene
+
+    // Hide the reset button after all operations are complete
+    setResetVisibility();
+});
+
 // Function to calculate the moon phase angle
 function getMoonPhaseAngle(date) {
     const year = date.getUTCFullYear();
@@ -166,7 +193,7 @@ let intervalId;
 // Event listeners for the left button
 document.getElementById('leftButton').addEventListener('mousedown', () => {
     adjustDateTime(-60); // Adjust by -1 hour immediately
-    intervalId = setInterval(() => adjustDateTime(-10), 20); // Adjust by -10 minute every 100ms
+    intervalId = setInterval(() => adjustDateTime(-2), 1); // Adjust by -10 minute every 100ms
 });
 
 document.getElementById('leftButton').addEventListener('mouseup', () => {
@@ -180,7 +207,7 @@ document.getElementById('leftButton').addEventListener('mouseleave', () => {
 // Event listeners for the right button
 document.getElementById('rightButton').addEventListener('mousedown', () => {
     adjustDateTime(60); // Adjust by +1 hour immediately
-    intervalId = setInterval(() => adjustDateTime(10), 20); // Adjust by +10 minute every 100ms
+    intervalId = setInterval(() => adjustDateTime(2), 1); // Adjust by +10 minute every 100ms
 });
 
 document.getElementById('rightButton').addEventListener('mouseup', () => {

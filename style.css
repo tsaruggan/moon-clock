@@ -1,4 +1,10 @@
-body { margin: 0; overflow: hidden; }
+* {
+    font-family: monospace;
+}
+body { 
+    margin: 0; 
+    overflow: hidden; 
+}
 canvas { display: block; position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
 .controls {
     position: absolute;
@@ -9,16 +15,19 @@ canvas { display: block; position: absolute; top: 0; left: 0; width: 100%; heigh
     display: flex;
     align-items: center;
     gap: 10px;
-    background: rgba(0, 255, 0, 0.1); /* Light green background */
-    padding: 10px;
-    border-radius: 1000px;
 }
-.button {
+.mainControls .button {
     background: none;
     border: none;
     font-size: 20px;
     cursor: pointer;
     color: #00FF00; /* Neon green color */
+    user-select: none; /* Disable user selection */
+    transition: color 1s ease; /* Smooth transition for color change */
+}
+
+.mainControls .button:hover {
+    text-shadow: 0 0 16px #00FF00; 
 }
 .datepicker {
     background: none;
@@ -44,4 +53,27 @@ canvas { display: block; position: absolute; top: 0; left: 0; width: 100%; heigh
 }
 .datepicker .date-cell:hover {
     background-color: #F0F0F0; /* Hover color for date cells */
+}
+.mainControls{
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    background: rgba(0, 255, 0, 0.1); /* Light green background */
+    padding: 10px;
+    border-radius: 1000px;
+}
+
+#resetButton {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #FF0000; /* Neon green color */
+    /* pointer-events: none; Disable pointer events */
+    user-select: none; /* Disable user selection */
+    font-weight: bolder;
+}
+#resetButton:hover {
+    text-shadow: 0 0 16px #FF0000; 
 }
