@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { format } from 'date-fns';
 
 // Constants
 const INITIAL_SCALE_FACTOR = 0.0075; // Adjust this value to control the initial size
@@ -116,7 +117,7 @@ function calculateMoonLibration(date) {
 
 // Update moon phase and libration for the current date
 let currentDate = new Date();
-document.getElementById('dateTimePicker').value = new Date().toISOString().slice(0, 16);
+document.getElementById('dateTimePicker').value = format(new Date(), "yyyy-MM-dd'T'HH:mm");
 
 // Initial scene update with apparent size adjustment
 const initialLibration = calculateMoonLibration(currentDate);
@@ -155,7 +156,7 @@ document.getElementById('leftButton').addEventListener('click', () => {
     dateTime.setHours(dateTime.getHours() - 1); // Adjusting hours by -1
 
     // Update the datetime picker value with local time
-    dateTimePicker.value = dateTime.toISOString().slice(0, 16);
+    dateTimePicker.value = format(dateTime, "yyyy-MM-dd'T'HH:mm");
 
     // Update the currentDate variable used in your application
     currentDate = dateTime;
@@ -170,7 +171,7 @@ document.getElementById('rightButton').addEventListener('click', () => {
     dateTime.setHours(dateTime.getHours() + 1); // Adjusting hours by +1
 
     // Update the datetime picker value with local time
-    dateTimePicker.value = dateTime.toISOString().slice(0, 16);
+    dateTimePicker.value = format(dateTime, "yyyy-MM-dd'T'HH:mm");
 
     // Update the currentDate variable used in your application
     currentDate = dateTime;
@@ -179,8 +180,7 @@ document.getElementById('rightButton').addEventListener('click', () => {
     updateScene();
 });
 
-
-// Animation loop
+// Function to animate the scene
 function animate() {
     requestAnimationFrame(animate);
     controls.update();
@@ -188,10 +188,3 @@ function animate() {
 }
 
 animate();
-
-// Handle window resize
-window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-});
