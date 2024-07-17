@@ -64,7 +64,7 @@ canvas { display: block; position: absolute; top: 0; left: 0; width: 100%; heigh
 }
 
 #resetButton {
-    display: none;
+    display: block;
     background: none;
     border: none;
     font-size: 20px;
@@ -76,4 +76,15 @@ canvas { display: block; position: absolute; top: 0; left: 0; width: 100%; heigh
 }
 #resetButton:hover {
     text-shadow: 0 0 16px #FF0000; 
+}
+
+#resetButton:disabled {
+    opacity: 0.5; /* Reduce opacity when disabled */
+    cursor: not-allowed; /* Change cursor to not-allowed when disabled */
+    color: #CCCCCC; /* Light gray color when disabled */
+}
+
+#resetButton:disabled:hover {
+    text-shadow: none; /* Remove text shadow on hover when disabled */
+    /* Additional styles if needed */
 }

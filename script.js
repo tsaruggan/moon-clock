@@ -65,22 +65,27 @@ controls.addEventListener('start', () => {
 // Function to toggle resetButton visibility
 function setResetVisibility() {
     const resetButton = document.getElementById('resetButton');
-    if (resetVisibility) {
-        resetButton.style.display = 'block';
-    } else {
-        resetButton.style.display = 'none';
-    }
+    // if (resetVisibility) {
+    //     resetButton.style.display = 'block';
+    // } else {
+    //     resetButton.style.display = 'none';
+    // }
+    resetButton.disabled = !resetVisibility;
 }
 
 // Event listener for reset button
 document.getElementById('resetButton').addEventListener('click', (event) => {
-    resetVisibility = false;
-    moon.position.set(0,0,0); // Reset moon position to initial
+    currentDate = new Date(); // Reset datetime to current date and time
+
+    // Update the datetime picker value with local time
+    document.getElementById('dateTimePicker').value = format(currentDate, "yyyy-MM-dd'T'HH:mm");
+
+    resetVisibility = false; // Hide reset button after resetting datetime
+    setResetVisibility(); // Update visibility of reset button
+
+    moon.position.set(0, 0, 0); // Reset moon position to initial
     controls.reset(); // Reset OrbitControls to initial settings
     updateScene(); // Update the scene
-
-    // Hide the reset button after all operations are complete
-    setResetVisibility();
 });
 
 // Function to calculate the moon phase angle
@@ -175,6 +180,8 @@ document.getElementById('dateTimePicker').addEventListener('input', (event) => {
         currentDate = dateTime;
         updateScene();
     }
+    resetVisibility = true; 
+    setResetVisibility(); // Update visibility of reset button
 });
 
 // Function to adjust the datetime by a given number of minutes
@@ -183,6 +190,9 @@ function adjustDateTime(minutes) {
 
     // Update the datetime picker value with local time
     document.getElementById('dateTimePicker').value = format(currentDate, "yyyy-MM-dd'T'HH:mm");
+
+    resetVisibility = true; // Hide reset button after resetting datetime
+    setResetVisibility(); // Update visibility of reset button
 
     // Call the function to update the scene based on the new datetime
     updateScene();
