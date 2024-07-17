@@ -1,5 +1,6 @@
 * {
     font-family: monospace;
+    transition: text-shadow 0.1s ease; /* Add transition for smooth effect */
 }
 body { 
     margin: 0; 
@@ -23,7 +24,7 @@ canvas { display: block; position: absolute; top: 0; left: 0; width: 100%; heigh
     cursor: pointer;
     color: #00FF00; /* Neon green color */
     user-select: none; /* Disable user selection */
-    transition: color 1s ease; /* Smooth transition for color change */
+    /* transition: color 1s ease;  */
 }
 
 .mainControls .button:hover {
@@ -87,4 +88,16 @@ canvas { display: block; position: absolute; top: 0; left: 0; width: 100%; heigh
 #resetButton:disabled:hover {
     text-shadow: none; /* Remove text shadow on hover when disabled */
     /* Additional styles if needed */
+}
+
+#githubButton {
+    display: block;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color:#FFFFFF;
+}
+#githubButton:hover {
+    text-shadow: 0 0 10px #00f, 0 0 20px #00f, 0 0 30px #00f; /* Multiple shadows for emphasis */
 }

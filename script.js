@@ -228,6 +228,11 @@ document.getElementById('rightButton').addEventListener('mouseleave', () => {
     clearInterval(intervalId);
 });
 
+document.getElementById('githubButton').addEventListener('click', function() {
+    window.open('https://github.com/tsaruggan/moon-clock', '_blank');
+});
+
+
 // Function to animate the scene
 function animate() {
     requestAnimationFrame(animate);
