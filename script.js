@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { format } from 'date-fns';
+import { format, addHours, addMinutes } from 'date-fns';
 
 // Constants
 const INITIAL_SCALE_FACTOR = 0.0075; // Adjust this value to control the initial size
@@ -150,34 +150,45 @@ document.getElementById('dateTimePicker').addEventListener('input', (event) => {
     }
 });
 
-document.getElementById('leftButton').addEventListener('click', () => {
-    const dateTimePicker = document.getElementById('dateTimePicker');
-    const dateTime = new Date(dateTimePicker.value);
-    dateTime.setHours(dateTime.getHours() - 1); // Adjusting hours by -1
+// Function to adjust the datetime by a given number of minutes
+function adjustDateTime(minutes) {
+    currentDate = addMinutes(currentDate, minutes); // Adjust the date by given minutes
 
     // Update the datetime picker value with local time
-    dateTimePicker.value = format(dateTime, "yyyy-MM-dd'T'HH:mm");
-
-    // Update the currentDate variable used in your application
-    currentDate = dateTime;
+    document.getElementById('dateTimePicker').value = format(currentDate, "yyyy-MM-dd'T'HH:mm");
 
     // Call the function to update the scene based on the new datetime
     updateScene();
+}
+
+let intervalId;
+
+// Event listeners for the left button
+document.getElementById('leftButton').addEventListener('mousedown', () => {
+    adjustDateTime(-60); // Adjust by -1 hour immediately
+    intervalId = setInterval(() => adjustDateTime(-10), 20); // Adjust by -10 minute every 100ms
 });
 
-document.getElementById('rightButton').addEventListener('click', () => {
-    const dateTimePicker = document.getElementById('dateTimePicker');
-    const dateTime = new Date(dateTimePicker.value);
-    dateTime.setHours(dateTime.getHours() + 1); // Adjusting hours by +1
+document.getElementById('leftButton').addEventListener('mouseup', () => {
+    clearInterval(intervalId);
+});
 
-    // Update the datetime picker value with local time
-    dateTimePicker.value = format(dateTime, "yyyy-MM-dd'T'HH:mm");
+document.getElementById('leftButton').addEventListener('mouseleave', () => {
+    clearInterval(intervalId);
+});
 
-    // Update the currentDate variable used in your application
-    currentDate = dateTime;
+// Event listeners for the right button
+document.getElementById('rightButton').addEventListener('mousedown', () => {
+    adjustDateTime(60); // Adjust by +1 hour immediately
+    intervalId = setInterval(() => adjustDateTime(10), 20); // Adjust by +10 minute every 100ms
+});
 
-    // Call the function to update the scene based on the new datetime
-    updateScene();
+document.getElementById('rightButton').addEventListener('mouseup', () => {
+    clearInterval(intervalId);
+});
+
+document.getElementById('rightButton').addEventListener('mouseleave', () => {
+    clearInterval(intervalId);
 });
 
 // Function to animate the scene
