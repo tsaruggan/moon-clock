@@ -1,7 +1,5 @@
-#version 330
-
 // Constants
-const float MIN_LIGHT_INTENSITY = 0.07;
+const float MIN_LIGHT_INTENSITY = 0.25;
 
 // Uniform variables
 uniform sampler2D textureMap; // Texture map for surface color
@@ -11,6 +9,9 @@ uniform sampler2D normalMap; // Normal map for surface normals
 varying vec2 vUv; // Texture coordinates
 varying mat3 tbn; // Tangent-binormal-normal matrix
 varying vec3 vLightVector; // Vector to light source in view space
+
+// Output variables
+out vec4 FragColor;
 
 void main() {
     // Transform texture coordinate of normal map to a range (-1, 1)
@@ -24,5 +25,5 @@ void main() {
     vec4 vLighting = vec4(intensity, intensity, intensity, 1.0);
 
     // Compute final fragment color after applying lighting
-    gl_FragColor = texture2D(textureMap, vUv) * vLighting;
+    FragColor = texture2D(textureMap, vUv) * vLighting;
 }

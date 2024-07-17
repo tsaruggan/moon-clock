@@ -1,5 +1,3 @@
-#version 330
-
 // Attribute variables
 attribute vec4 tangent; // Tangent attribute for normal mapping
 

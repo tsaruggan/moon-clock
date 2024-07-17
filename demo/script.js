@@ -1,65 +1,162 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { format, addHours, addMinutes } from 'date-fns';
+import { format, addMinutes } from 'date-fns';
 
 // Constants
-const INITIAL_SCALE_FACTOR = 0.0075; // Adjust this value to control the initial size
-const INITIAL_X_ROTATION = 0; // Adjust this value for the initial X rotation
-const INITIAL_Y_ROTATION = 0; // Adjust this value for the initial Y rotation
-const INITIAL_Z_ROTATION = 0; // Adjust this value for the initial Z rotation
+const INITIAL_SCALE_FACTOR = 0.0075;
+const INITIAL_X_ROTATION = 0;
+const INITIAL_Y_ROTATION = 0;
+const INITIAL_Z_ROTATION = 0;
 
-// Scene setup
-const scene = new THREE.Scene();
+// Three.js components
+let scene, camera, renderer, textureLoader, geometry, texture, normalMap, material, ambientLight, directionalLight, controls, moon, currentDate, initialLibration, intervalId, resetVisibility;
 
-// Camera setup
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.set(5, 0, 0); // Position the camera along the X-axis
-camera.lookAt(0, 0, 0); // Point the camera at the center of the scene
+function init(shaders) {
+    // Scene setup
+    scene = new THREE.Scene();
 
-// Renderer setup
-const renderer = new THREE.WebGLRenderer();
-renderer.setSize(window.innerWidth, window.innerHeight);
-document.body.appendChild(renderer.domElement);
+    // Camera setup
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(5, 0, 0);
+    camera.lookAt(0, 0, 0);
 
-// Sphere geometry and material for the moon
-const geometry = new THREE.SphereGeometry(2, 64, 64);
-const textureLoader = new THREE.TextureLoader();
-const texture = textureLoader.load('../maps/texture_map.png');
-const normalMap = textureLoader.load('../maps/normal_map.png');
-const displacementMap = textureLoader.load('../maps/displacement_map.png');
+    // Renderer setup
+    renderer = new THREE.WebGLRenderer({
+        antialias: true,
+        preserveDrawingBuffer: true
+    });
+    renderer.setClearColor(0x000000, 1);
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
 
-const material = new THREE.MeshStandardMaterial({
-    map: texture,
-    normalMap: normalMap,
-    displacementMap: displacementMap,
-    displacementScale: 0.025,
-    displacementBias: -0.05,
-    metalness: 0,
-    roughness: 1,
-    side: THREE.DoubleSide
-});
+    // Light setup
+    // ambientLight = new THREE.AmbientLight(0xffffff, 10);
+    // scene.add(ambientLight);
 
-const moon = new THREE.Mesh(geometry, material);
-scene.add(moon);
+    directionalLight = new THREE.DirectionalLight(0xffffff, 5);
+    directionalLight.castShadow = true;
+    directionalLight.shadow.mapSize.width = 2048;
+    directionalLight.shadow.mapSize.height = 2048;
+    scene.add(directionalLight);
 
-// Light setup
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.05); // Dim ambient light
-scene.add(ambientLight);
+    // Create moon
+    textureLoader = new THREE.TextureLoader();
+    texture = textureLoader.load('../maps/texture_map.png');
+    normalMap = textureLoader.load('../maps/normal_map.png');
 
-const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5); // Strong directional light
-directionalLight.castShadow = true;
-directionalLight.shadow.mapSize.width = 2048;
-directionalLight.shadow.mapSize.height = 2048;
-scene.add(directionalLight);
+    // Sphere geometry
+    geometry = new THREE.SphereGeometry(2, 64, 64);
 
-// Orbit controls
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
+    // Shader material
+    material = new THREE.ShaderMaterial({
+        glslVersion: THREE.GLSL3,
+        uniforms: {
+            textureMap: { value: texture, type: 't' },
+            normalMap: { value: normalMap, type: 't' },
+            lightPosition: { value: directionalLight.position, type: 'v3' },
+            uvScale: { type: 'v2', value: new THREE.Vector2(1.0, 1.0)}
+        },
+        vertexShader: shaders.vertexShaderSource,
+        fragmentShader: shaders.fragmentShaderSource
+    });
 
-// Micellaneous variables
-let intervalId; // used for button longpress
-let resetVisibility = false; // used to display reset button
+    // Create mesh
+    moon = new THREE.Mesh(geometry, material);
+    moon.geometry.computeTangents();
+    moon.position.set(0, 0, 0);
+    moon.rotation.set(0, 0, 0);
+    scene.add(moon);
 
+
+    // Orbit controls setup
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+
+    // Initialize current date
+    currentDate = new Date();
+    document.getElementById('dateTimePicker').value = format(currentDate, "yyyy-MM-dd'T'HH:mm");
+
+    // Initial moon appearance
+    initialLibration = calculateMoonLibration(currentDate);
+    moon.rotation.x = INITIAL_X_ROTATION;
+    moon.rotation.y = INITIAL_Y_ROTATION;
+    moon.rotation.z = INITIAL_Z_ROTATION;
+    moon.scale.setScalar(initialLibration.apparentSize / INITIAL_SCALE_FACTOR);
+    updateScene();
+
+    // Event listeners
+    document.getElementById('dateTimePicker').addEventListener('input', (event) => {
+        const dateTime = new Date(event.target.value);
+        if (!isNaN(dateTime)) {
+            currentDate = dateTime;
+            updateScene();
+        }
+        resetVisibility = true;
+        setResetVisibility();
+    });
+
+    controls.addEventListener('start', () => {
+        resetVisibility = true;
+        setResetVisibility();
+    });
+
+    // Left button events
+    document.getElementById('leftButton').addEventListener('mousedown', () => {
+        adjustDateTime(-60);
+        intervalId = setInterval(() => adjustDateTime(-2), 1);
+    });
+
+    document.getElementById('leftButton').addEventListener('mouseup', () => {
+        clearInterval(intervalId);
+    });
+
+    document.getElementById('leftButton').addEventListener('mouseleave', () => {
+        clearInterval(intervalId);
+    });
+
+    // Right button events
+    document.getElementById('rightButton').addEventListener('mousedown', () => {
+        adjustDateTime(60);
+        intervalId = setInterval(() => adjustDateTime(2), 1);
+    });
+
+    document.getElementById('rightButton').addEventListener('mouseup', () => {
+        clearInterval(intervalId);
+    });
+
+    document.getElementById('rightButton').addEventListener('mouseleave', () => {
+        clearInterval(intervalId);
+    });
+
+    // GitHub button event
+    document.getElementById('githubButton').addEventListener('click', () => {
+        window.open('https://github.com/tsaruggan/moon-clock', '_blank');
+    });
+
+    // Reset button event
+    document.getElementById('resetButton').addEventListener('click', () => {
+        currentDate = new Date();
+        document.getElementById('dateTimePicker').value = format(currentDate, "yyyy-MM-dd'T'HH:mm");
+        resetVisibility = false;
+        setResetVisibility();
+        moon.position.set(0, 0, 0);
+        controls.reset();
+        updateScene();
+    });
+
+    // Micellaneous variables
+    intervalId; // used for button longpress
+    resetVisibility = false; // used to display reset button
+}
+
+// Animation loop
+function animate() {
+    requestAnimationFrame(animate);
+    controls.update();
+    renderer.render(scene, camera);
+}
+
+// Helper functions
 // Function to calculate the moon phase angle
 function getMoonPhaseAngle(date) {
     const year = date.getUTCFullYear();
@@ -119,22 +216,23 @@ function calculateMoonLibration(date) {
     return { librationLongitude, librationLatitude, apparentSize };
 }
 
-// Get & attach current date
-let currentDate = new Date();
-document.getElementById('dateTimePicker').value = format(new Date(), "yyyy-MM-dd'T'HH:mm");
+function adjustDateTime(minutes) {
+    currentDate = addMinutes(currentDate, minutes);
+    document.getElementById('dateTimePicker').value = format(currentDate, "yyyy-MM-dd'T'HH:mm");
+    resetVisibility = true;
+    setResetVisibility();
+    updateScene();
+}
 
-// Initial scene update with librartion & apparent size adjustment
-const initialLibration = calculateMoonLibration(currentDate);
-moon.rotation.x = INITIAL_X_ROTATION;
-moon.rotation.y = INITIAL_Y_ROTATION;
-moon.rotation.z = INITIAL_Z_ROTATION;
-moon.scale.setScalar(initialLibration.apparentSize / INITIAL_SCALE_FACTOR);
-updateScene();
+// Function to enable/disable reset button based on current state
+function setResetVisibility() {
+    const resetButton = document.getElementById('resetButton');
+    resetButton.disabled = !resetVisibility;
+}
 
 // Update the moon's appeareance using rotation / libration / apparent size / phase based on current date
 function updateScene() {
     updateMoonPhase(currentDate);
-
     moon.rotation.x = INITIAL_X_ROTATION;
     moon.rotation.y = INITIAL_Y_ROTATION;
     moon.rotation.z = INITIAL_Z_ROTATION;
@@ -145,99 +243,22 @@ function updateScene() {
     moon.scale.setScalar(apparentSize / INITIAL_SCALE_FACTOR);
 }
 
-// Event listener for datetime picker input
-document.getElementById('dateTimePicker').addEventListener('input', (event) => {
-    const dateTime = new Date(event.target.value);
-    if (!isNaN(dateTime)) {
-        currentDate = dateTime;
-        updateScene();
-    }
-
-    // Show the reset button
-    resetVisibility = true; 
-    setResetVisibility();
-});
-
-// Function to adjust the datetime by a given number of minutes
-function adjustDateTime(minutes) {
-    currentDate = addMinutes(currentDate, minutes); // Adjust the date by given minutes
-
-    // Update the datetime picker value with local time
-    document.getElementById('dateTimePicker').value = format(currentDate, "yyyy-MM-dd'T'HH:mm");
-
-    // Show the reset button
-    resetVisibility = true; 
-    setResetVisibility(); 
-
-    updateScene();
+// Load shaders
+function loadShader(url) {
+    return new Promise((resolve, reject) => {
+        const loader = new THREE.FileLoader();
+        loader.load(url, (data) => resolve(data), undefined, reject);
+    });
 }
 
-// Function to enable/disable reset button based on current state
-function setResetVisibility() {
-    const resetButton = document.getElementById('resetButton');
-    resetButton.disabled = !resetVisibility;
-}
-
-// Event listener for ThreeJS Orbit Controls
-controls.addEventListener('start', () => {
-    resetVisibility = true;
-    setResetVisibility();
+// Start initialization process after shaders are loaded
+Promise.all([
+    loadShader('../shaders/vertex_shader.glsl'),
+    loadShader('../shaders/fragment_shader.glsl')
+]).then(([vertexShaderSource, fragmentShaderSource]) => {
+    const shaders = { vertexShaderSource, fragmentShaderSource };
+    init(shaders); // Call initialization function with loaded shaders
+    animate(); // Start animation loop
+}).catch(error => {
+    console.error('Error loading shaders:', error);
 });
-
-// Event listeners for the left button
-document.getElementById('leftButton').addEventListener('mousedown', () => {
-    adjustDateTime(-60); // Adjust by -1 hour immediately
-    intervalId = setInterval(() => adjustDateTime(-2), 1); // Adjust by -10 minute every 100ms
-});
-
-document.getElementById('leftButton').addEventListener('mouseup', () => {
-    clearInterval(intervalId);
-});
-
-document.getElementById('leftButton').addEventListener('mouseleave', () => {
-    clearInterval(intervalId);
-});
-
-// Event listeners for the right button
-document.getElementById('rightButton').addEventListener('mousedown', () => {
-    adjustDateTime(60); // Adjust by +1 hour immediately
-    intervalId = setInterval(() => adjustDateTime(2), 1); // Adjust by +10 minute every 100ms
-});
-
-document.getElementById('rightButton').addEventListener('mouseup', () => {
-    clearInterval(intervalId);
-});
-
-document.getElementById('rightButton').addEventListener('mouseleave', () => {
-    clearInterval(intervalId);
-});
-
-// Event listener for GitHub link button
-document.getElementById('githubButton').addEventListener('click', function() {
-    window.open('https://github.com/tsaruggan/moon-clock', '_blank');
-});
-
-// Event listener for reset button
-document.getElementById('resetButton').addEventListener('click', (event) => {
-    currentDate = new Date(); // Reset datetime to current date and time
-
-    // Update the datetime picker value with local time
-    document.getElementById('dateTimePicker').value = format(currentDate, "yyyy-MM-dd'T'HH:mm");
-
-    resetVisibility = false; // Hide reset button after resetting datetime
-    setResetVisibility(); // Update visibility of reset button
-
-    moon.position.set(0, 0, 0); // Reset moon position to initial
-    controls.reset(); // Reset OrbitControls to initial settings
-    updateScene(); // Update the scene
-});
-
-
-// Function to animate the scene
-function animate() {
-    requestAnimationFrame(animate);
-    controls.update();
-    renderer.render(scene, camera);
-}
-
-animate();
