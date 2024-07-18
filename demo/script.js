@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { format, addMinutes } from 'date-fns';
+import { format, addMinutes, differenceInMinutes } from 'date-fns';
 
 // Constants
 const INITIAL_SCALE_FACTOR = 0.0075;
@@ -103,7 +103,7 @@ function init(shaders) {
     // Left button events
     document.getElementById('leftButton').addEventListener('mousedown', () => {
         adjustDateTime(-60);
-        intervalId = setInterval(() => adjustDateTime(-2), 1);
+        intervalId = setInterval(() => adjustDateTime(-10), 1);
     });
 
     document.getElementById('leftButton').addEventListener('mouseup', () => {
@@ -117,7 +117,7 @@ function init(shaders) {
     // Right button events
     document.getElementById('rightButton').addEventListener('mousedown', () => {
         adjustDateTime(60);
-        intervalId = setInterval(() => adjustDateTime(2), 1);
+        intervalId = setInterval(() => adjustDateTime(10), 1);
     });
 
     document.getElementById('rightButton').addEventListener('mouseup', () => {
@@ -158,10 +158,11 @@ function animate() {
 
 // Helper functions
 // Function to calculate the moon phase angle
+// Function to calculate the moon phase angle
 function getMoonPhaseAngle(date) {
     const year = date.getUTCFullYear();
     const month = date.getUTCMonth() + 1; // months are 0-indexed
-    const day = date.getUTCDate();
+    const day = date.getUTCDate() + (date.getUTCHours() / 24) + (date.getUTCMinutes() / 1440); // Include hours and minutes for smoothness
 
     // Convert the date to Julian Days
     const jd = (367 * year) - Math.floor((7 * (year + Math.floor((month + 9) / 12))) / 4) + Math.floor((275 * month) / 9) + day + 1721013.5;

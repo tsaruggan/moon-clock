@@ -1,5 +1,5 @@
 // Constants
-const float MIN_LIGHT_INTENSITY = 0.25;
+const float MIN_LIGHT_INTENSITY = 0.05;
 
 // Uniform variables
 uniform sampler2D textureMap; // Texture map for surface color
