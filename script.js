@@ -1,6 +1,6 @@
-import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { format, addMinutes } from 'date-fns';
+import * as THREE from './libs/three.module.js';
+import { OrbitControls } from './libs/OrbitControls.js';
+import { format, addMinutes } from 'https://esm.run/date-fns';
 
 // Constants & Global Variables
 
@@ -17,10 +17,10 @@ let moon;
 let fileLoader = new THREE.FileLoader();
 let textureLoader = new THREE.TextureLoader();
 
-const TEXTURE_MAP_PATH = '../maps/texture_map.png';
-const NORMAL_MAP_PATH = '../maps/normal_map.png';
-const VERTEX_SHADER_PATH = '../shaders/vertex_shader.glsl';
-const FRAGMENT_SHADER_PATH = '../shaders/fragment_shader.glsl';
+const TEXTURE_MAP_PATH = '/maps/texture_map.png';
+const NORMAL_MAP_PATH = '/maps/normal_map.png';
+const VERTEX_SHADER_PATH = '/shaders/vertex_shader.glsl';
+const FRAGMENT_SHADER_PATH = '/shaders/fragment_shader.glsl';
 
 const INITIAL_SCALE_FACTOR = 0.0075;
 const INITIAL_X_ROTATION = 0;
@@ -246,6 +246,11 @@ function disableResetButton(disabled) {
     resetButton.disabled = disabled;
 }
 
+// Hide the loading thingy
+function hideLoading() {
+    document.getElementById('loadingOverlay').style.display = 'none';
+}
+
 // Update the moon's appeareance using rotation / libration / apparent size / phase based on current date
 function updateScene() {
     updateMoonPhase(currentDate);
@@ -280,6 +285,7 @@ Promise.all([
 ]).then(([textureMap, normalMap, vertexShader, fragmentShader]) => {
     const assets = { textureMap, normalMap, vertexShader, fragmentShader };
     init(assets); // First initialize with loaded textures + shaders
+    hideLoading() // Hide the loading thingy
     animate(); // Start animation loop
 }).catch(error => {
     console.error('Error loading assets:', error);
