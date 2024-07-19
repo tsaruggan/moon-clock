@@ -160,6 +160,9 @@ function init(assets) {
         controls.reset();
         updateScene();
     });
+
+    // Resize event listener
+    window.addEventListener('resize', onWindowResize, false);
 }
 
 // Animation loop
@@ -275,6 +278,14 @@ function loadShader(path) {
         fileLoader.load(path, (data) => resolve(data), undefined, reject);
     });
 }
+
+// window resize
+function onWindowResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
 
 // Main
 Promise.all([
